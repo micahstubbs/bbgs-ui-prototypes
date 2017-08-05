@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+  .tooltip {
+    width: 230px;
+    height: 120px;
+    background-color: #ffffff;
+    padding: 3px 12px;
+    font-family: sans-serif;
+    border: 1px solid #bbbbbb;
+    box-shadow: 1px 1px 4px #bbbbbb;
+	}
+  img {
+    max-width: 230px;
+    max-height: 120px;
+  }
+  #canvas-container {
+   width: 100%;
+   text-align:center;
+}
+
+canvas {
+   display: inline;
+}
+</style>
+<a target="_blank" style="outline:none;">
+  <div id="canvas-container">
+    <canvas width="960" height="960">Your browser does not support canvas</canvas>
+  </div>
+</a>
+<script src="https://d3js.org/d3.v4.0.0-alpha.40.min.js"></script>
+<script src="https://npmcdn.com/babel-core@5.8.34/browser.min.js"></script>
+<script lang='babel' type='text/babel'>
+  const canvas = document.querySelector('canvas');
+  const context = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  const searchRadius = 10;
+
+  const color = d3.scaleCategory20();
+
+  const simulation = d3.forceSimulation()
+    .force('charge', d3.forceManyBody().strength(-18))
+    .force('link', d3.forceLink().iterations(4).id(d => d.id))
+    .force('x', d3.forceX())
+    .force('y', d3.forceY());
+
+  const tooltip = d3.select('body')
+    .append('div')
+      .attr('class', 'tooltip')
+      .style('position', 'absolute')
+      .style('z-index', '10')
+      .style('visibility', 'hidden');
+
+  d3.json('graph.json', (error, graph) => {
+    if (error) throw error;
+
+    const users = d3.nest()
+      .key(d => d.user)
+      .entries(graph.nodes)
+      .sort((a, b) => b.values.length - a.values.length);
+
+    color.domain(users.map(d => d.key));
+
+    simulation
+      .nodes(graph.nodes)
+      .on('tick', ticked);
+
+    simulation.force('link')
+      .links(graph.links);
+
+    d3.select(canvas)
+      .on('mousemove', mousemoved)
+      .call(d3.drag()
+        .container(canvas)
+        .subject(dragsubject)
+        .on('start', dragstarted)
+        .on('drag', dragged)
+        .on('end', dragended));
+
+    function ticked() {
+      context.clearRect(0, 0, width, height);
+      context.save();
+      context.translate(width / 2, height / 2);
+
+      context.beginPath();
+      graph.links.forEach(drawLink);
+      context.strokeStyle = '#aaa';
+      context.stroke();
+
+      users.forEach((user) => {
+        context.beginPath();
+        user.values.forEach(drawNode);
+        context.fillStyle = color(user.key);
+        context.fill();
+      });
+
+      context.restore();
+    }
+
+    function dragsubject() {
+      return simulation.find(d3.event.x - width / 2, d3.event.y - height / 2, searchRadius);
+    }
+
+    function mousemoved() {
+      const a = this.parentNode;
+      const m = d3.mouse(this);
+      const d = simulation.find(m[0] - width / 2, m[1] - height / 2, searchRadius);
+
+      if (!d) return a.removeAttribute('href');
+      a.removeAttribute('title');
+      tooltip.style('visibility', 'hidden');
+
+      a.setAttribute('href', `http://bl.ocks.org/${(d.user ? `${d.user}/` : '')}${d.id}`);
+      a.setAttribute('title', `${d.id}${(d.user ? ` by ${d.user}` : '')}${(d.description ? `\n${d.description}` : '')}`);
+      loadTooltipThumb(d);
+    }
+  });
+
+  function dragstarted() {
+    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    simulation.fix(d3.event.subject);
+  }
+
+  function dragged() {
+    simulation.fix(d3.event.subject, d3.event.x, d3.event.y);
+  }
+
+  function dragended() {
+    if (!d3.event.active) simulation.alphaTarget(0);
+    simulation.unfix(d3.event.subject);
+  }
+
+  function drawLink(d) {
+    context.moveTo(d.source.x, d.source.y);
+    context.lineTo(d.target.x, d.target.y);
+  }
+
+  function drawNode(d) {
+    context.moveTo(d.x + 3, d.y);
+    context.arc(d.x, d.y, 3, 0, 2 * Math.PI);
+  }
+
+  function loadTooltipThumb(d) {
+    tooltip.select('*').remove();
+
+    const thumbnailURL = `https://bl.ocks.org/${(d.user ? `${d.user}/` : '')}raw/${d.id}/thumbnail.png`;
+
+    const top = d3.event.pageY - 150;
+
+    tooltip.style('top', `${top}px`)
+      .style('left', `${d3.event.pageX + 40}px`)
+      .style('visibility', 'visible')
+      .append('img')
+      .attr('src', thumbnailURL);
+  }
+</script>

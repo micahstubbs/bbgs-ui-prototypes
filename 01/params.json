@@ -1,0 +1,5 @@
+{
+  "statements" : [ {
+    "statement" : "MATCH(n)-[:LINKS_TO]-(m) WHERE n.description =~  '.*map.*'RETURN n, m"
+  } ]
+}
