@@ -21,11 +21,86 @@ const tooltip = d3
   .style('z-index', '10')
   .style('visibility', 'hidden');
 
-d3.json('graph.json', drawGraph);
+//
+// make the request to neo4j for the data
+//
+const url = 'http://localhost:7474/db/data/transaction/commit';
+const requestData = JSON.stringify({
+  statements: [
+    {
+      statement: "MATCH(n)-[:LINKS_TO]-(m) WHERE n.description =~  '.*map.*'RETURN n, m"
+    }
+  ]
+});
+const myHeaders = new Headers();
+myHeaders.append('Content-Type', 'application/json');
+myHeaders.append('Authorization', 'Basic bmVvNGo6YWRtaW4=');
+myHeaders.append('Accept', 'application/json; charset=UTF-8');
+const myInit = {
+  method: 'POST',
+  body: requestData,
+  headers: myHeaders
+};
+const myRequest = new Request(url, myInit);
+fetch(myRequest)
+  .then(response => response.json())
+  .then(data => parseResponse(data))
+  .catch(e => {
+    console.log(e);
+  });
 
-function drawGraph(error, graph) {
-  if (error) throw error;
+//
+// parse the response from neo4j
+//
+function parseResponse(responseData) {
+  const graph = {
+    nodes: [],
+    links: []
+  };
+  const nodeSet = new Set();
 
+  console.log('responseData from parseResponse', responseData);
+  const graphData = responseData.results[0].data;
+  graphData.forEach(inputLink => {
+    const source = inputLink.row[0].gistId;
+    const target = inputLink.row[1].gistId;
+    if (typeof source !== 'undefined' && typeof target !== 'undefined') {
+      // collect the nodes in a set
+      // which builds up a list of unique nodes
+      inputLink.row.forEach(inputNode => {
+        nodeSet.add({
+          id: inputNode.gistId,
+          createdAt: inputNode.createdAt,
+          description: inputNode.description,
+          updatedAt: inputNode.updatedAt,
+          user: inputNode.user
+        });
+      });
+      // assume that the inputLink rows
+      // are in [source, target] format
+      // TODO: check the neo4j REST API docs
+      // to verify this
+      graph.links.push({
+        source,
+        target
+      });
+    }
+  });
+
+  // add the unique nodes that we've collected
+  // onto our graph object
+  graph.nodes = [...nodeSet];
+
+  // call the drawGraph function
+  // to plot the graph
+  drawGraph(graph);
+}
+
+//
+// visualize the graph
+//
+function drawGraph(graph) {
+  console.log('graph from drawGraph', graph);
   const users = d3
     .nest()
     .key(d => d.user)
