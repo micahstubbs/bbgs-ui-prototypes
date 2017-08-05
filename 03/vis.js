@@ -49,6 +49,8 @@ fetch(myRequest)
     console.log(e);
   });
 
+const imageCache = {};
+
 //
 // parse the response from neo4j
 //
@@ -101,6 +103,8 @@ function parseResponse(responseData) {
 //
 function drawGraph(graph) {
   console.log('graph from drawGraph', graph);
+  cacheImages(graph, imageCache);
+
   const users = d3
     .nest()
     .key(d => d.user)
@@ -155,27 +159,31 @@ function drawGraph(graph) {
   }
 
   function mousemoved() {
-    const a = this.parentNode;
-    const m = d3.mouse(this);
-    const d = simulation.find(
-      m[0] - width / 2,
-      m[1] - height / 2,
-      searchRadius
-    );
-
-    if (!d) return a.removeAttribute('href');
-    a.removeAttribute('title');
-    tooltip.style('visibility', 'hidden');
-
-    a.setAttribute(
-      'href',
-      `http://bl.ocks.org/${d.user ? `${d.user}/` : ''}${d.id}`
-    );
-    a.setAttribute(
-      'title',
-      `${d.id}${d.user ? ` by ${d.user}` : ''}${d.description ? `\n${d.description}` : ''}`
-    );
-    loadTooltipThumb(d);
+    //
+    // disable mouse move links for now
+    //
+    // const a = this.parentNode;
+    // const m = d3.mouse(this);
+    // const d = simulation.find(
+    //   m[0] - width / 2,
+    //   m[1] - height / 2,
+    //   searchRadius
+    // );
+    // if (!d) return a.removeAttribute('href');
+    // a.removeAttribute('title');
+    // tooltip.style('visibility', 'hidden');
+    // a.setAttribute(
+    //   'href',
+    //   `http://bl.ocks.org/${d.user ? `${d.user}/` : ''}${d.id}`
+    // );
+    // a.setAttribute(
+    //   'title',
+    //   `${d.id}${d.user ? ` by ${d.user}` : ''}${d.description ? `\n${d.description}` : ''}`
+    // );
+    //
+    // disable tooltips for now
+    //
+    // loadTooltipThumb(d);
   }
 }
 
@@ -201,10 +209,21 @@ function drawLink(d) {
 function drawNode(d) {
   // context.moveTo(d.x + 3, d.y);
   // context.arc(d.x, d.y, 3, 0, 2 * Math.PI);
+  const image = imageCache[d.id];
+  if (typeof image !== 'undefined' && image.height > 0) {
+    context.drawImage(image, 0, 0, 230, 120, d.x, d.y, 46, 24);
+  }
+}
 
-  var image = new Image();
-  image.src = `https://bl.ocks.org/${d.user ? `${d.user}/` : ''}raw/${d.id}/thumbnail.png`;
-  context.drawImage(image, 0, 0, 300, 227, d.x, d.y, 30, 30);
+function cacheImages(graph, imageCache) {
+  graph.nodes.forEach(d => {
+    const image = new Image();
+    image.src = `https://bl.ocks.org/${d.user ? `${d.user}/` : ''}raw/${d.id}/thumbnail.png`;
+    // image.onload = function() {
+    //   imageCache[d.id] = image;
+    // };
+    imageCache[d.id] = image;
+  });
 }
 
 function loadTooltipThumb(d) {
