@@ -4,7 +4,7 @@ const width = canvas.width;
 const height = canvas.height;
 const searchRadius = 10;
 
-const color = d3.scaleCategory20();
+const color = d3.scaleOrdinal().range(d3.schemeCategory20);
 
 const simulation = d3
   .forceSimulation()
