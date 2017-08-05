@@ -203,7 +203,7 @@ function drawNode(d) {
   // context.arc(d.x, d.y, 3, 0, 2 * Math.PI);
 
   var image = new Image();
-  image.src = 'https://mdn.mozillademos.org/files/5397/rhino.jpg';
+  image.src = `https://bl.ocks.org/${d.user ? `${d.user}/` : ''}raw/${d.id}/thumbnail.png`;
   context.drawImage(image, 0, 0, 300, 227, d.x, d.y, 30, 30);
 }
 
