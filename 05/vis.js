@@ -248,6 +248,18 @@ function drawNode(d) {
     context.clip();
     context.closePath();
     context.restore();
+  } else {
+    // gray from the blockbuilder search results page
+    context.fillStyle = '#EEEEEE';
+    context.beginPath();
+    context.arc(d.x, d.y, 22, 0, Math.PI * 2, true);
+    context.closePath();
+    context.fill();
+
+    // teal from blockbuilder search results page
+    context.fillStyle = '#66B5B4';
+    context.font = '20px Georgia';
+    context.fillText('?', d.x - 5, d.y + 8);
   }
 }
 
