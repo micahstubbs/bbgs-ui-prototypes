@@ -212,16 +212,18 @@ function drawLink(d) {
 }
 
 function drawNode(d) {
+  // old solid color nodes
   // context.moveTo(d.x + 3, d.y);
   // context.arc(d.x, d.y, 3, 0, 2 * Math.PI);
 
-  // let tmpCanvas = document.createElement('canvas');
-  // tmpCtx = tmpCanvas.getContext('2d');
   const image = imageCache[d.id];
 
   const iconWidth = 92;
   const iconHeight = 48;
 
+  // draw images with a circular clip mask
+  // so that rectangular thumbnail images become
+  // round node icons
   if (typeof image !== 'undefined' && image.height > 0) {
     context.save();
     context.beginPath();
