@@ -225,7 +225,7 @@ function drawNode(d) {
   if (typeof image !== 'undefined' && image.height > 0) {
     context.save();
     context.beginPath();
-    context.arc(2 * 48, 2 * 48, 2 * 48, 0, Math.PI * 2, true);
+    context.arc(d.x, d.y, 24, 0, Math.PI * 2, true);
     context.closePath();
     context.clip();
 
