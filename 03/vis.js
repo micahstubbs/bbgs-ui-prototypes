@@ -115,7 +115,10 @@ function drawGraph(graph) {
 
   simulation.nodes(graph.nodes).on('tick', ticked);
 
-  simulation.force('link').links(graph.links);
+  simulation
+    .force('charge', d3.forceManyBody().strength(() => -80))
+    .force('link')
+    .links(graph.links);
 
   d3
     .select(canvas)
