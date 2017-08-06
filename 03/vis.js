@@ -8,7 +8,7 @@ const color = d3.scaleOrdinal().range(d3.schemeCategory20);
 
 const simulation = d3
   .forceSimulation()
-  .force('charge', d3.forceManyBody().strength(-18))
+  .force('charge', d3.forceManyBody().strength(-70))
   .force('link', d3.forceLink().iterations(4).id(d => d.id))
   .force('x', d3.forceX())
   .force('y', d3.forceY());
@@ -116,7 +116,6 @@ function drawGraph(graph) {
   simulation.nodes(graph.nodes).on('tick', ticked);
 
   simulation
-    .force('charge', d3.forceManyBody().strength(() => -80))
     .force('link')
     .links(graph.links);
 
@@ -217,7 +216,8 @@ function drawNode(d) {
   // context.arc(d.x, d.y, 3, 0, 2 * Math.PI);
   const image = imageCache[d.id];
   if (typeof image !== 'undefined' && image.height > 0) {
-    context.drawImage(image, 0, 0, 230, 120, d.x, d.y, 46, 24);
+    context.drawImage(image, 0, 0, 230, 120, d.x, d.y, 20, 20);
+    // context.drawImage(image, 0, 0, 230, 120, d.x, d.y, 46, 24
   }
 }
 
