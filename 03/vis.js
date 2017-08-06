@@ -162,24 +162,24 @@ function drawGraph(graph) {
     //
     // disable mouse move links for now
     //
-    // const a = this.parentNode;
-    // const m = d3.mouse(this);
-    // const d = simulation.find(
-    //   m[0] - width / 2,
-    //   m[1] - height / 2,
-    //   searchRadius
-    // );
-    // if (!d) return a.removeAttribute('href');
-    // a.removeAttribute('title');
+    const a = this.parentNode;
+    const m = d3.mouse(this);
+    const d = simulation.find(
+      m[0] - width / 2,
+      m[1] - height / 2,
+      searchRadius
+    );
+    if (!d) return a.removeAttribute('href');
+    a.removeAttribute('title');
     // tooltip.style('visibility', 'hidden');
-    // a.setAttribute(
-    //   'href',
-    //   `http://bl.ocks.org/${d.user ? `${d.user}/` : ''}${d.id}`
-    // );
-    // a.setAttribute(
-    //   'title',
-    //   `${d.id}${d.user ? ` by ${d.user}` : ''}${d.description ? `\n${d.description}` : ''}`
-    // );
+    a.setAttribute(
+      'href',
+      `http://bl.ocks.org/${d.user ? `${d.user}/` : ''}${d.id}`
+    );
+    a.setAttribute(
+      'title',
+      `${d.id}${d.user ? ` by ${d.user}` : ''}${d.description ? `\n${d.description}` : ''}`
+    );
     //
     // disable tooltips for now
     //
