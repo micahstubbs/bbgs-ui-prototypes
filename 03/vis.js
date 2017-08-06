@@ -59,7 +59,7 @@ function parseResponse(responseData) {
     nodes: [],
     links: []
   };
-  const nodeSet = new Set();
+  const nodeHash = {};
 
   console.log('responseData from parseResponse', responseData);
   const graphData = responseData.results[0].data;
@@ -70,13 +70,13 @@ function parseResponse(responseData) {
       // collect the nodes in a set
       // which builds up a list of unique nodes
       inputLink.row.forEach(inputNode => {
-        nodeSet.add({
+        nodeHash[inputNode.gistId] = {
           id: inputNode.gistId,
           createdAt: inputNode.createdAt,
           description: inputNode.description,
           updatedAt: inputNode.updatedAt,
           user: inputNode.user
-        });
+        };
       });
       // assume that the inputLink rows
       // are in [source, target] format
@@ -91,7 +91,9 @@ function parseResponse(responseData) {
 
   // add the unique nodes that we've collected
   // onto our graph object
-  graph.nodes = [...nodeSet];
+  Object.keys(nodeHash).forEach(key => {
+    graph.nodes.push(nodeHash[key]);
+  })
 
   // call the drawGraph function
   // to plot the graph
