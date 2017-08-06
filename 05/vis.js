@@ -8,8 +8,8 @@ const color = d3.scaleOrdinal().range(d3.schemeCategory20);
 
 const simulation = d3
   .forceSimulation()
-  .force('charge', d3.forceManyBody().strength(-150))
-  .force('link', d3.forceLink().iterations(4).id(d => d.id)) // .distance(() => 48)
+  .force('charge', d3.forceManyBody().strength(-260))
+  .force('link', d3.forceLink().iterations(4).id(d => d.id).distance(() => 92)) // .distance(() => 48)
   .force('x', d3.forceX())
   .force('y', d3.forceY());
 
@@ -227,7 +227,7 @@ function drawNode(d) {
   if (typeof image !== 'undefined' && image.height > 0) {
     context.save();
     context.beginPath();
-    context.arc(d.x, d.y, 24, 0, Math.PI * 2, true);
+    context.arc(d.x, d.y, 22, 0, Math.PI * 2, true);
     context.closePath();
     context.clip();
 
