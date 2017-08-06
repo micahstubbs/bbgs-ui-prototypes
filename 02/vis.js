@@ -181,16 +181,19 @@ function drawGraph(graph) {
 
 function dragstarted() {
   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-  simulation.fix(d3.event.subject);
+  d3.event.subject.fx = d3.event.subject.x;
+  d3.event.subject.fy = d3.event.subject.y;
 }
 
 function dragged() {
-  simulation.fix(d3.event.subject, d3.event.x, d3.event.y);
+  d3.event.subject.fx = d3.event.x;
+  d3.event.subject.fy = d3.event.y;
 }
 
 function dragended() {
   if (!d3.event.active) simulation.alphaTarget(0);
-  simulation.unfix(d3.event.subject);
+  d3.event.subject.fx = null;
+  d3.event.subject.fy = null;
 }
 
 function drawLink(d) {
