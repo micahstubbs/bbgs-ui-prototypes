@@ -6,12 +6,20 @@ const searchRadius = 30;
 
 const color = d3.scaleOrdinal().range(d3.schemeCategory20);
 
+const collide = d3
+  .forceRectCollide(function(d, i) {
+    return i % 2 === 0 ? [[-48, -92], [48, 92]] : [[-48, -92], [48, 92]];
+  })
+  .strength(0.05)
+  .iterations(2);
+
 const simulation = d3
   .forceSimulation()
   .force('charge', d3.forceManyBody().strength(-150))
   .force('link', d3.forceLink().iterations(4).id(d => d.id)) // .distance(() => 48)
   .force('x', d3.forceX())
-  .force('y', d3.forceY());
+  .force('y', d3.forceY())
+  .force('collide', collide);
 
 // const tooltip = d3
 //   .select('body')
