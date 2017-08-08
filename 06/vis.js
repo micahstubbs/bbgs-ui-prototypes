@@ -6,10 +6,13 @@ const searchRadius = 30;
 
 const color = d3.scaleOrdinal().range(d3.schemeCategory20);
 
-const simulation = d3.forceSimulation().force('charge', d3.forceManyBody()); //.strength())
+// Create the simulation with a small forceX and Y towards the center
+var simulation = d3.forceSimulation().force('charge', d3.forceManyBody());
+// .force('x', d3.forceX(width/2).strength(0.05))
+// .force('y', d3.forceY(height/2).strength(0.05));
+
+// const simulation = d3.forceSimulation().force('charge', d3.forceManyBody()); //.strength())
 // .force('link', d3.forceLink().iterations(4).id(d => d.id).distance(() => 92)) // .distance(() => 48)
-// .force('x', d3.forceX(width).strength(0.05))
-// .force('y', d3.forceY(height).strength(0.05));
 
 // const tooltip = d3
 //   .select('body')
@@ -202,7 +205,7 @@ function drawGraph(graph) {
     )
     .on('tick', ticked);
 
-  simulation.force('link').links(graph.links);
+  // simulation.force('link').links(graph.links);
 
   d3
     .select(canvas)
