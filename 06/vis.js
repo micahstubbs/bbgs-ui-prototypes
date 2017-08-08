@@ -57,7 +57,9 @@ function fetchGraphSearchResults(queryString) {
 //
 const mapQueryString =
   "MATCH(n)-[:LINKS_TO]-(m) WHERE n.description =~  '.*map.*'RETURN n, m";
-fetchGraphSearchResults(mapQueryString);
+const enjalotQueryString =
+  "MATCH(n)-[:LINKS_TO]-(m) WHERE n.user =~ '.*enjalot.*'RETURN n, m";
+fetchGraphSearchResults(enjalotQueryString);
 
 //
 // when the user pastes in a query

@@ -16,6 +16,9 @@ MATCH(n)-[:LINKS_TO]-(m)
  WHERE n.user =~ '.*enjalot.*'
  RETURN n, m
 
+// in one line
+MATCH(n)-[:LINKS_TO]-(m) WHERE n.user =~ '.*enjalot.*'RETURN n, m
+
 // user curran
 MATCH(n)-[:LINKS_TO]-(m) WHERE n.user =~ '.*curran.*'RETURN n, m
 
