@@ -11,4 +11,4 @@ RETURN n, m
 
 the cool thing about this is the related nodes may not have `map` anywhere in the description, but we can still use some known graph of d3 example relationships (in this case README citations) to infer that they are relevant to a map keyword search
 
-![map query demo screenshot]()
+![user enjalot query](https://user-images.githubusercontent.com/2119400/29060929-a4419cac-7bd0-11e7-92d1-6cb81304ff2c.png)
