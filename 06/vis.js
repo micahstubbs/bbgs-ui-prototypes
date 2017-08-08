@@ -313,8 +313,8 @@ function drawNode(d) {
   const radius = 22;
 
   // draw border to check intution
-  context.strokeStyle = 'blue';
-  context.strokeRect(-width / 2, -height / 2, width - 2, height - 2);
+  // context.strokeStyle = 'darkgray';
+  // context.strokeRect(-width / 2, -height / 2, width - 2, height - 2);
 
   // const minX = Math.min(d.x, width - radius);
   // const nX = Math.max(-width / 2 + radius, minX);
