@@ -6,12 +6,10 @@ const searchRadius = 30;
 
 const color = d3.scaleOrdinal().range(d3.schemeCategory20);
 
-const simulation = d3
-  .forceSimulation()
-  .force('charge', d3.forceManyBody().strength(-260))
-  .force('link', d3.forceLink().iterations(4).id(d => d.id).distance(() => 92)) // .distance(() => 48)
-  .force('x', d3.forceX())
-  .force('y', d3.forceY());
+const simulation = d3.forceSimulation().force('charge', d3.forceManyBody()); //.strength())
+// .force('link', d3.forceLink().iterations(4).id(d => d.id).distance(() => 92)) // .distance(() => 48)
+// .force('x', d3.forceX(width).strength(0.05))
+// .force('y', d3.forceY(height).strength(0.05));
 
 // const tooltip = d3
 //   .select('body')
@@ -24,31 +22,56 @@ const simulation = d3
 //
 // make the request to neo4j for the data
 //
-const url = 'http://localhost:7474/db/data/transaction/commit';
-const requestData = JSON.stringify({
-  statements: [
-    {
-      statement: "MATCH(n)-[:LINKS_TO]-(m) WHERE n.description =~  '.*map.*'RETURN n, m"
-    }
-  ]
-});
-const myHeaders = new Headers();
-myHeaders.append('Content-Type', 'application/json');
-myHeaders.append('Authorization', 'Basic bmVvNGo6YWRtaW4=');
-myHeaders.append('Accept', 'application/json; charset=UTF-8');
-const myInit = {
-  method: 'POST',
-  body: requestData,
-  headers: myHeaders
-};
-const myRequest = new Request(url, myInit);
-fetch(myRequest)
-  .then(response => response.json())
-  .then(data => parseResponse(data))
-  .catch(e => {
-    console.log(e);
+function fetchGraphSearchResults(queryString) {
+  const url = 'http://localhost:7474/db/data/transaction/commit';
+  const requestData = JSON.stringify({
+    statements: [
+      {
+        statement: queryString
+      }
+    ]
   });
+  const myHeaders = new Headers();
+  myHeaders.append('Content-Type', 'application/json');
+  myHeaders.append('Authorization', 'Basic bmVvNGo6YWRtaW4=');
+  myHeaders.append('Accept', 'application/json; charset=UTF-8');
+  const myInit = {
+    method: 'POST',
+    body: requestData,
+    headers: myHeaders
+  };
+  const myRequest = new Request(url, myInit);
+  fetch(myRequest)
+    .then(response => response.json())
+    .then(data => parseResponse(data))
+    .catch(e => {
+      console.log(e);
+    });
+}
 
+//
+// run a defult query so the user has
+// something nice to look at on load
+//
+const mapQueryString =
+  "MATCH(n)-[:LINKS_TO]-(m) WHERE n.description =~  '.*map.*'RETURN n, m";
+fetchGraphSearchResults(mapQueryString);
+
+//
+// when the user pastes in a query
+// and clicks the `Search the Graph` button
+// post a new request to neo4j with that query
+//
+document.getElementById('query-form').addEventListener('submit', function(e) {
+  e.preventDefault(); //to prevent form submission
+  const query = document.getElementById('query-textarea').value;
+  console.log('query from form', query);
+  fetchGraphSearchResults(query);
+});
+
+//
+// cache images
+//
 const imageCache = {};
 
 //
@@ -84,7 +107,8 @@ function parseResponse(responseData) {
       // to verify this
       graph.links.push({
         source,
-        target
+        target,
+        weight: 1 // for jsLouvain community detection
       });
     }
   });
@@ -107,6 +131,31 @@ function drawGraph(graph) {
   console.log('graph from drawGraph', graph);
   cacheImages(graph, imageCache);
 
+  // clear the canvas
+  context.clearRect(0, 0, canvas.width, canvas.height);
+
+  //
+  // detect communities with jsLouvain
+  //
+  const nodeData = graph.nodes.map(function(d) {
+    return d.id;
+  });
+  const linkData = graph.links.map(function(d) {
+    return { source: d.source, target: d.target, weight: d.weight };
+  });
+
+  const community = jLouvain().nodes(nodeData).edges(linkData);
+  const result = community();
+
+  const nodeIndexHash = {};
+  graph.nodes.forEach(function(node, i) {
+    node.group = result[node.id];
+    nodeIndexHash[node.id] = i;
+  });
+
+  //
+  //
+  //
   const users = d3
     .nest()
     .key(d => d.user)
@@ -115,7 +164,43 @@ function drawGraph(graph) {
 
   color.domain(users.map(d => d.key));
 
-  simulation.nodes(graph.nodes).on('tick', ticked);
+  //
+  // process links data to use simple node array index ids
+  // for source and target values
+  // to satisfy the assumption of the forceInABox layout
+  //
+  graph.links.forEach(link => {
+    // record the gistId
+    link.sourceGistId = link.source;
+    link.targetGistId = link.target;
+
+    // now use the node index
+    link.source = nodeIndexHash[link.source];
+    link.target = nodeIndexHash[link.target];
+  });
+
+  //
+  // Instantiate the forceInABox force
+  //
+  const groupingForce = forceInABox()
+    .strength(0.001) // Strength to foci
+    .template('force') // Either treemap or force
+    .groupBy('group') // Node attribute to group
+    .links(graph.links) // The graph links. Must be called after setting the grouping attribute
+    .size([width, height]); // Size of the chart
+
+  // Add your forceInABox to the simulation
+  simulation
+    .nodes(graph.nodes)
+    .force('group', groupingForce)
+    .force(
+      'link',
+      d3
+        .forceLink(graph.links)
+        .distance(50)
+        .strength(groupingForce.getLinkStrength) // default link force will try to join nodes in the same group stronger than if they are in different groups
+    )
+    .on('tick', ticked);
 
   simulation.force('link').links(graph.links);
 

@@ -26,8 +26,8 @@ canvas {
 }
 </style>
 <div>
-  <form action="" method="post">
-    <textarea name='Text1' cols='200' rows='5' autocomplete='on' autofocus='true' spellcheck='false'></textarea>
+  <form id="query-form" method="post">
+    <textarea id='query-textarea' name='Text1' cols='200' rows='5' autocomplete='on' autofocus='true' spellcheck='false'></textarea>
     <input type="submit" value="Search the Graph">
   </form>
 </div>
@@ -38,4 +38,6 @@ canvas {
 </a>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/4.10.0/d3.js'></script>
 <script src='d3-force.js'></script>
+<script src="forceInABox.js"></script>
+<script src='jsLouvain.js'></script>
 <script src='vis.js'></script>
