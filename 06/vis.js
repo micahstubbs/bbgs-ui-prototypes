@@ -7,7 +7,11 @@ const searchRadius = 30;
 const color = d3.scaleOrdinal().range(d3.schemeCategory20);
 
 // Create the simulation with a small forceX and Y towards the center
-var simulation = d3.forceSimulation().force('charge', d3.forceManyBody());
+var simulation = d3
+  .forceSimulation()
+  .force('charge', d3.forceManyBody())
+  .force('x', d3.forceX(0).strength(0.003))
+  .force('y', d3.forceY(0).strength(0.003));
 
 // const tooltip = d3
 //   .select('body')
@@ -313,8 +317,8 @@ function drawNode(d) {
   const radius = 22;
 
   // draw border to check intution
-  // context.strokeStyle = 'darkgray';
-  // context.strokeRect(-width / 2, -height / 2, width - 2, height - 2);
+  context.strokeStyle = 'darkgray';
+  context.strokeRect(-width / 2, -height / 2, width - 2, height - 2);
 
   // const minX = Math.min(d.x, width - radius);
   // const nX = Math.max(-width / 2 + radius, minX);
