@@ -289,9 +289,17 @@ function dragended() {
   d3.event.subject.fy = null;
 }
 
+// a small function to ensure that
+// points stay inside the canvas
+function boundScalar(p) {
+  const halfEdge = 448;
+  const minP = Math.min(p, halfEdge);
+  return Math.max(-halfEdge, minP);
+}
+
 function drawLink(d) {
-  context.moveTo(d.source.x, d.source.y);
-  context.lineTo(d.target.x, d.target.y);
+  context.moveTo(boundScalar(d.source.x), boundScalar(d.source.y));
+  context.lineTo(boundScalar(d.target.x), boundScalar(d.target.y));
 }
 
 function drawNode(d) {
@@ -300,9 +308,36 @@ function drawNode(d) {
   // context.arc(d.x, d.y, 3, 0, 2 * Math.PI);
 
   const image = imageCache[d.id];
-
   const iconWidth = 92;
   const iconHeight = 48;
+  const radius = 22;
+
+  // draw border to check intution
+  context.strokeStyle = 'blue';
+  context.strokeRect(-width / 2, -height / 2, width - 2, height - 2);
+
+  // const minX = Math.min(d.x, width - radius);
+  // const nX = Math.max(-width / 2 + radius, minX);
+
+  // const minY = Math.min(d.y, height - 2 * radius);
+  // const nY = Math.max(-height / 2 - radius, minY);
+
+  // const minX = Math.min(d.x, 448);
+  // const nX = Math.max(-448, minX);
+
+  // const minY = Math.min(d.y, 448);
+  // const nY = Math.max(-448, minY);
+
+  const nX = boundScalar(d.x);
+  const nY = boundScalar(d.y);
+
+  // if (d.x !== nX || d.y !== nY) {
+  //   console.log('d.x', d.x);
+  //   console.log('d.y', d.y);
+  //   console.log('nX', nX);
+  //   console.log('nY', nY);
+  //   console.log('------------');
+  // }
 
   // draw images with a circular clip mask
   // so that rectangular thumbnail images become
@@ -310,7 +345,7 @@ function drawNode(d) {
   if (typeof image !== 'undefined' && image.height > 0) {
     context.save();
     context.beginPath();
-    context.arc(d.x, d.y, 22, 0, Math.PI * 2, true);
+    context.arc(nX, nY, radius, 0, Math.PI * 2, true);
     context.closePath();
     context.clip();
 
@@ -320,8 +355,8 @@ function drawNode(d) {
       0,
       230,
       120,
-      d.x - iconWidth / 2,
-      d.y - iconHeight / 2,
+      nX - iconWidth / 2,
+      nY - iconHeight / 2,
       iconWidth,
       iconHeight
     );
@@ -335,14 +370,14 @@ function drawNode(d) {
     // gray from the blockbuilder search results page
     context.fillStyle = '#EEEEEE';
     context.beginPath();
-    context.arc(d.x, d.y, 22, 0, Math.PI * 2, true);
+    context.arc(nX, nY, radius, 0, Math.PI * 2, true);
     context.closePath();
     context.fill();
 
     // teal from blockbuilder search results page
     context.fillStyle = '#66B5B4';
     context.font = '20px Georgia';
-    context.fillText('?', d.x - 5, d.y + 8);
+    context.fillText('?', nX - 5, nY + 8);
   }
 }
 
