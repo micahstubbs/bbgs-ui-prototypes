@@ -1,14 +1,11 @@
 This iteration adds input both for neo4j Cypher graph search queries
 
-This iteration calls the neo4j api to display the results of this query, which finds all blocks that have the string `map` somewhere in the description (gist title)
-show those blocks and all blocks that they have a 1st degree link-in-the-README citation relationship with
+This query finds all of the blocks from user `enjalot` that mention blocks or are mentioned themselves.  Then, we show those blocks as well as all 1st degree connections
 
 ```
 MATCH(n)-[:LINKS_TO]-(m)
-WHERE n.description =~  '.*map.*'
-RETURN n, m
+ WHERE n.user =~ '.*enjalot.*'
+ RETURN n, m
 ```
-
-the cool thing about this is the related nodes may not have `map` anywhere in the description, but we can still use some known graph of d3 example relationships (in this case README citations) to infer that they are relevant to a map keyword search
 
 ![user enjalot query](https://user-images.githubusercontent.com/2119400/29060929-a4419cac-7bd0-11e7-92d1-6cb81304ff2c.png)
