@@ -13,64 +13,59 @@ var simulation = d3
   .force('x', d3.forceX(0).strength(0.003))
   .force('y', d3.forceY(0).strength(0.003));
 
-// const tooltip = d3
-//   .select('body')
-//   .append('div')
-//   .attr('class', 'tooltip')
-//   .style('position', 'absolute')
-//   .style('z-index', '10')
-//   .style('visibility', 'hidden');
+//
+// comment out for now, until we have a public neo4j instance running
+// https://think-lab.github.io/d/216/#1
+//
 
 //
 // make the request to neo4j for the data
 //
-function fetchGraphSearchResults(queryString) {
-  const url = 'http://localhost:7474/db/data/transaction/commit';
-  const requestData = JSON.stringify({
-    statements: [
-      {
-        statement: queryString
-      }
-    ]
-  });
-  const myHeaders = new Headers();
-  myHeaders.append('Content-Type', 'application/json');
-  myHeaders.append('Authorization', 'Basic bmVvNGo6YWRtaW4=');
-  myHeaders.append('Accept', 'application/json; charset=UTF-8');
-  const myInit = {
-    method: 'POST',
-    body: requestData,
-    headers: myHeaders
-  };
-  const myRequest = new Request(url, myInit);
-  fetch(myRequest)
-    .then(response => response.json())
-    .then(data => parseResponse(data))
-    .catch(e => {
-      console.log(e);
-    });
-}
+// function fetchGraphSearchResults(queryString) {
+//   const url = 'http://localhost:7474/db/data/transaction/commit';
+//   const requestData = JSON.stringify({
+//     statements: [
+//       {
+//         statement: queryString
+//       }
+//     ]
+//   });
+//   const myHeaders = new Headers();
+//   myHeaders.append('Content-Type', 'application/json');
+//   myHeaders.append('Authorization', 'Basic bmVvNGo6YWRtaW4=');
+//   myHeaders.append('Accept', 'application/json; charset=UTF-8');
+//   const myInit = {
+//     method: 'POST',
+//     body: requestData,
+//     headers: myHeaders
+//   };
+//   const myRequest = new Request(url, myInit);
+//   fetch(myRequest)
+//     .then(response => response.json())
+//     .then(data => parseResponse(data))
+//     .catch(e => {
+//       console.log(e);
+//     });
+// }
 
 //
 // run a defult query so the user has
 // something nice to look at on load
 //
-const mapQueryString =
-  "MATCH(n)-[:LINKS_TO]-(m) WHERE n.description =~  '.*map.*'RETURN n, m";
-const enjalotQueryString =
-  "MATCH(n)-[:LINKS_TO]-(m) WHERE n.user =~ '.*enjalot.*'RETURN n, m";
-fetchGraphSearchResults(enjalotQueryString);
+// const mapQueryString =
+//   "MATCH(n)-[:LINKS_TO]-(m) WHERE n.description =~  '.*map.*'RETURN n, m";
+// const enjalotQueryString =
+//   "MATCH(n)-[:LINKS_TO]-(m) WHERE n.user =~ '.*enjalot.*'RETURN n, m";
+// fetchGraphSearchResults(enjalotQueryString);
 
 //
-// when the user pastes in a query
-// and clicks the `Search the Graph` button
-// post a new request to neo4j with that query
+// load static neo4j API response data from a file
 //
-document.getElementById('query-form').addEventListener('submit', function(e) {
-  e.preventDefault(); //to prevent form submission
-  const query = document.getElementById('query-textarea').value;
-  console.log('query from form', query);
-  fetchGraphSearchResults(query);
+d3.json('neo4j-api-response.json', (error, response) => {
+  if (error) {
+    console.error(error);
+  }
+  parseResponse(response);
 });
 
 //
@@ -263,7 +258,6 @@ function drawGraph(graph) {
     );
     if (!d) return a.removeAttribute('href');
     a.removeAttribute('title');
-    // tooltip.style('visibility', 'hidden');
     a.setAttribute(
       'href',
       `http://bl.ocks.org/${d.user ? `${d.user}/` : ''}${d.id}`
@@ -274,10 +268,6 @@ function drawGraph(graph) {
         ? `\n${d.description}`
         : ''}`
     );
-    //
-    // disable tooltips for now
-    //
-    // loadTooltipThumb(d);
   }
 
   function clicked() {
@@ -413,21 +403,4 @@ function cacheImages(graph, imageCache) {
     // };
     imageCache[d.id] = image;
   });
-}
-
-function loadTooltipThumb(d) {
-  tooltip.select('*').remove();
-
-  const thumbnailURL = `https://bl.ocks.org/${d.user
-    ? `${d.user}/`
-    : ''}raw/${d.id}/thumbnail.png`;
-
-  const top = d3.event.pageY - 150;
-
-  tooltip
-    .style('top', `${top}px`)
-    .style('left', `${d3.event.pageX + 40}px`)
-    .style('visibility', 'visible')
-    .append('img')
-    .attr('src', thumbnailURL);
 }
