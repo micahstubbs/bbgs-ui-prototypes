@@ -211,6 +211,7 @@ function drawGraph(graph) {
   d3
     .select(canvas)
     .on('mousemove', mousemoved)
+    .on('click', clicked)
     .call(
       d3
         .drag()
@@ -269,12 +270,25 @@ function drawGraph(graph) {
     );
     a.setAttribute(
       'title',
-      `${d.id}${d.user ? ` by ${d.user}` : ''}${d.description ? `\n${d.description}` : ''}`
+      `${d.id}${d.user ? ` by ${d.user}` : ''}${d.description
+        ? `\n${d.description}`
+        : ''}`
     );
     //
     // disable tooltips for now
     //
     // loadTooltipThumb(d);
+  }
+
+  function clicked() {
+    const m = d3.mouse(this);
+    const d = simulation.find(
+      m[0] - width / 2,
+      m[1] - height / 2,
+      searchRadius
+    );
+    const blockUrl = `http://bl.ocks.org/${d.user ? `${d.user}/` : ''}${d.id}`;
+    window.open(blockUrl);
   }
 }
 
@@ -391,7 +405,9 @@ function cacheImages(graph, imageCache) {
   graph.nodes.forEach(d => {
     const image = new Image();
 
-    image.src = `https://bl.ocks.org/${d.user ? `${d.user}/` : ''}raw/${d.id}/thumbnail.png`;
+    image.src = `https://bl.ocks.org/${d.user
+      ? `${d.user}/`
+      : ''}raw/${d.id}/thumbnail.png`;
     // image.onload = function() {
     //   imageCache[d.id] = image;
     // };
@@ -402,7 +418,9 @@ function cacheImages(graph, imageCache) {
 function loadTooltipThumb(d) {
   tooltip.select('*').remove();
 
-  const thumbnailURL = `https://bl.ocks.org/${d.user ? `${d.user}/` : ''}raw/${d.id}/thumbnail.png`;
+  const thumbnailURL = `https://bl.ocks.org/${d.user
+    ? `${d.user}/`
+    : ''}raw/${d.id}/thumbnail.png`;
 
   const top = d3.event.pageY - 150;
 
