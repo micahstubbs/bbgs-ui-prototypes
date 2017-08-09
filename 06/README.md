@@ -1,4 +1,4 @@
-This iteration adds input both for neo4j Cypher graph search queries
+This iteration adds an input box for neo4j Cypher graph search queries
 
 This query finds all of the blocks from user `enjalot` that mention blocks or are mentioned themselves.  Then, we show those blocks as well as all 1st degree connections
 
