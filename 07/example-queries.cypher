@@ -8,6 +8,10 @@ MATCH(n)-[:LINKS_TO]-(m) WHERE n.description =~  '.*map.*'RETURN n, m
 // description keyword `color`
 MATCH(n)-[:LINKS_TO]-(m) WHERE n.description =~  '.*color.*'RETURN n, m
 
+// description keyword `layout`
+MATCH(n)-[:LINKS_TO]-(m) WHERE n.description =~  '.*layout*'RETURN n, m
+
+
 // find all of the blocks from user enjalot
 // that mention blocks or are mentioned
 // show those blocks and all 
