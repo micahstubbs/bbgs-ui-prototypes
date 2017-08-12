@@ -28,3 +28,6 @@ MATCH(n)-[:LINKS_TO]-(m) WHERE n.user =~ '.*curran.*'RETURN n, m
 
 // user micahstubbs
 MATCH(n)-[:LINKS_TO]-(m) WHERE n.user =~ '.*micahstubbs.*'RETURN n, m
+
+// user emeeks
+MATCH(n)-[:LINKS_TO]-(m) WHERE n.user =~ '.*emeeks.*'RETURN n, m
