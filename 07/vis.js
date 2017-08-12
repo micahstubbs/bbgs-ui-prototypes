@@ -137,6 +137,7 @@ function drawGraph(graph) {
 
   // clear the canvas
   context.clearRect(0, 0, canvas.width, canvas.height);
+  simulation.alphaTarget(0.2).restart();
 
   //
   // detect communities with jsLouvain
