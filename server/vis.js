@@ -25,7 +25,7 @@ var simulation = d3
 // make the request to neo4j for the data
 //
 function fetchGraphSearchResults(queryString) {
-  const server = 'http://138.197.194.92/';
+  const server = '138.197.194.92';
   const url = `http://${server}:7474/db/data/transaction/commit`;
   const requestData = JSON.stringify({
     statements: [
