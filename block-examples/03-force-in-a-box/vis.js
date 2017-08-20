@@ -6,69 +6,67 @@ const searchRadius = 30;
 
 const color = d3.scaleOrdinal().range(d3.schemeCategory20);
 
-// const tooltip = d3
-//   .select('body')
-//   .append('div')
-//   .attr('class', 'tooltip')
-//   .style('position', 'absolute')
-//   .style('z-index', '10')
-//   .style('visibility', 'hidden');
+// Create the simulation with a small forceX and Y towards the center
+var simulation = d3
+  .forceSimulation()
+  .force('charge', d3.forceManyBody().strength(-50))
+  .force('collide', d3.forceCollide(25))
+  .force('x', d3.forceX(width / 2).strength(0.05))
+  .force('y', d3.forceY(height / 2).strength(0.05));
+
+//
+// comment out for now, until we have a public neo4j instance running
+// https://think-lab.github.io/d/216/#1
+//
 
 //
 // make the request to neo4j for the data
 //
-function fetchGraphSearchResults(queryString) {
-  const url = 'http://localhost:7474/db/data/transaction/commit';
-  const requestData = JSON.stringify({
-    statements: [
-      {
-        statement: queryString
-      }
-    ]
-  });
-  const myHeaders = new Headers();
-  myHeaders.append('Content-Type', 'application/json');
-  myHeaders.append('Authorization', 'Basic bmVvNGo6YWRtaW4=');
-  myHeaders.append('Accept', 'application/json; charset=UTF-8');
-  const myInit = {
-    method: 'POST',
-    body: requestData,
-    headers: myHeaders
-  };
-  const myRequest = new Request(url, myInit);
-  fetch(myRequest)
-    .then(response => response.json())
-    .then(data => parseResponse(data))
-    .catch(e => {
-      console.log(e);
-    });
-}
+// function fetchGraphSearchResults(queryString) {
+//   const url = 'http://localhost:7474/db/data/transaction/commit';
+//   const requestData = JSON.stringify({
+//     statements: [
+//       {
+//         statement: queryString
+//       }
+//     ]
+//   });
+//   const myHeaders = new Headers();
+//   myHeaders.append('Content-Type', 'application/json');
+//   myHeaders.append('Authorization', 'Basic bmVvNGo6YWRtaW4=');
+//   myHeaders.append('Accept', 'application/json; charset=UTF-8');
+//   const myInit = {
+//     method: 'POST',
+//     body: requestData,
+//     headers: myHeaders
+//   };
+//   const myRequest = new Request(url, myInit);
+//   fetch(myRequest)
+//     .then(response => response.json())
+//     .then(data => parseResponse(data))
+//     .catch(e => {
+//       console.log(e);
+//     });
+// }
 
 //
 // run a defult query so the user has
 // something nice to look at on load
 //
-const mapQueryString =
-  "MATCH(n)-[:LINKS_TO]-(m) WHERE n.description =~  '.*map.*'RETURN n, m";
-const enjalotQueryString =
-  "MATCH(n)-[:LINKS_TO]-(m) WHERE n.user =~ '.*enjalot.*'RETURN n, m";
-const queryString = enjalotQueryString;
-fetchGraphSearchResults(queryString);
-
-// set the initial value of the query box to match
-// the example query that loads by default
-document.getElementById('query-textarea').value = queryString;
+// const mapQueryString =
+//   "MATCH(n)-[:LINKS_TO]-(m) WHERE n.description =~  '.*map.*'RETURN n, m";
+// const enjalotQueryString =
+//   "MATCH(n)-[:LINKS_TO]-(m) WHERE n.user =~ '.*enjalot.*'RETURN n, m";
+// fetchGraphSearchResults(enjalotQueryString);
 
 //
-// when the user pastes in a query
-// and clicks the `Search the Graph` button
-// post a new request to neo4j with that query
+// load static neo4j API response data from a file
 //
-document.getElementById('query-form').addEventListener('submit', function(e) {
-  e.preventDefault(); //to prevent form submission
-  const query = document.getElementById('query-textarea').value;
-  console.log('query from form', query);
-  fetchGraphSearchResults(query);
+d3.json('neo4j-api-response.json', (error, response) => {
+  if (error) {
+    console.error(error);
+  }
+  parseResponse(response);
 });
 
 //
@@ -123,55 +121,18 @@ function parseResponse(responseData) {
 
   // call the drawGraph function
   // to plot the graph
-  drawGraph(graph, 'grid'); // 'boundedForce'
+  drawGraph(graph);
 }
 
 //
 // visualize the graph
 //
-function drawGraph(graph, layout) {
+function drawGraph(graph) {
   console.log('graph from drawGraph', graph);
   cacheImages(graph, imageCache);
 
-  let simulation;
-  switch (layout) {
-    case 'grid':
-      // Create the simulation with a small forceX and Y towards the center
-      simulation = d3
-        .forceSimulation()
-        .force('charge', d3.forceManyBody().strength(-50))
-        .force('collide', d3.forceCollide(25))
-        .force('x', d3.forceX(width / 2).strength(0.05))
-        .force('y', d3.forceY(height / 2).strength(0.05));
-      break;
-    case 'boundedForce':
-      // Create the simulation with a small forceX and Y towards the center
-      simulation = d3
-        .forceSimulation()
-        .force('charge', d3.forceManyBody())
-        .force('x', d3.forceX(0).strength(0.003))
-        .force('y', d3.forceY(0).strength(0.003));
-      break;
-    default:
-      // Create the simulation with a small forceX and Y towards the center
-      simulation = d3
-        .forceSimulation()
-        .force('charge', d3.forceManyBody())
-        .force('x', d3.forceX(0).strength(0.003))
-        .force('y', d3.forceY(0).strength(0.003));
-  }
-
   // clear the canvas
   context.clearRect(0, 0, canvas.width, canvas.height);
-
-  switch (layout) {
-    case 'grid':
-      break;
-    case 'boundedForce':
-      simulation.alphaTarget(0.2).restart();
-      break;
-    default:
-  }
 
   //
   // detect communities with jsLouvain
@@ -219,35 +180,15 @@ function drawGraph(graph, layout) {
   });
 
   //
-  // Instantiate the grouping force
+  // Instantiate the forceInABox force
   //
-  let groupingForce;
-  switch (layout) {
-    case 'grid':
-      groupingForce = forceInABox()
-        .strength(0.2) // Strength to foci
-        .template('treemap') // Either treemap or force
-        .groupBy('group') // Node attribute to group
-        .nodeSize(22) // How big is each node?
-        .links(graph.links) // The graph links. Must be called after setting the grouping attribute
-        .size([width, height]); // Size of the chart
-      break;
-    case 'boundedForce':
-      groupingForce = forceInABox()
-        .strength(0.001) // Strength to foci
-        .template('force') // Either treemap or force
-        .groupBy('group') // Node attribute to group
-        .links(graph.links) // The graph links. Must be called after setting the grouping attribute
-        .size([width, height]); // Size of the chart
-      break;
-    default:
-      groupingForce = forceInABox()
-        .strength(0.001) // Strength to foci
-        .template('force') // Either treemap or force
-        .groupBy('group') // Node attribute to group
-        .links(graph.links) // The graph links. Must be called after setting the grouping attribute
-        .size([width, height]); // Size of the chart
-  }
+  const groupingForce = forceInABox()
+    .strength(0.2) // Strength to foci
+    .template('treemap') // Either treemap or force
+    .groupBy('group') // Node attribute to group
+    .nodeSize(22) // How big is each node?
+    .links(graph.links) // The graph links. Must be called after setting the grouping attribute
+    .size([width, height]); // Size of the chart
 
   // Add your forceInABox to the simulation
   simulation
@@ -281,26 +222,20 @@ function drawGraph(graph, layout) {
   function ticked() {
     context.clearRect(0, 0, width, height);
     context.save();
-
-    switch (layout) {
-      case 'grid':
-        // context.translate(width / 2, height / 2);
-        break;
-      case 'boundedForce':
-        context.translate(width / 2, height / 2);
-        break;
-      default:
-        context.translate(width / 2, height / 2);
-    }
+    // context.translate(width / 2, height / 2);
 
     context.beginPath();
-    graph.links.forEach(drawLink.bind(this, layout));
+    graph.links.forEach(drawLink);
     context.strokeStyle = '#aaa';
     context.stroke();
 
+    // draw border to check intution
+    context.strokeStyle = 'darkgray';
+    context.strokeRect(0, 0, width, height);
+
     users.forEach(user => {
       context.beginPath();
-      user.values.forEach(drawNode.bind(this, layout));
+      user.values.forEach(drawNode);
       context.fillStyle = color(user.key);
       context.fill();
     });
@@ -329,7 +264,6 @@ function drawGraph(graph, layout) {
     );
     if (!d) return a.removeAttribute('href');
     a.removeAttribute('title');
-    // tooltip.style('visibility', 'hidden');
     a.setAttribute(
       'href',
       `http://bl.ocks.org/${d.user ? `${d.user}/` : ''}${d.id}`
@@ -340,10 +274,6 @@ function drawGraph(graph, layout) {
         ? `\n${d.description}`
         : ''}`
     );
-    //
-    // disable tooltips for now
-    //
-    // loadTooltipThumb(d);
   }
 
   function clicked() {
@@ -377,36 +307,17 @@ function dragended() {
 
 // a small function to ensure that
 // points stay inside the canvas
-function boundScalar(p, layout) {
-  let minP;
-  let halfEdge;
-  switch (layout) {
-    case 'grid':
-      minP = Math.min(p, width);
-      return Math.max(0, minP);
-    case 'boundedForce':
-      halfEdge = 448;
-      minP = Math.min(p, halfEdge);
-      return Math.max(-halfEdge, minP);
-    default:
-      halfEdge = 448;
-      minP = Math.min(p, halfEdge);
-      return Math.max(-halfEdge, minP);
-  }
+function boundScalar(p) {
+  const minP = Math.min(p, width);
+  return Math.max(0, minP);
 }
 
-function drawLink(layout, d) {
-  context.moveTo(
-    boundScalar(d.source.x, layout),
-    boundScalar(d.source.y, layout)
-  );
-  context.lineTo(
-    boundScalar(d.target.x, layout),
-    boundScalar(d.target.y, layout)
-  );
+function drawLink(d) {
+  context.moveTo(boundScalar(d.source.x), boundScalar(d.source.y));
+  context.lineTo(boundScalar(d.target.x), boundScalar(d.target.y));
 }
 
-function drawNode(layout, d) {
+function drawNode(d) {
   // old solid color nodes
   // context.moveTo(d.x + 3, d.y);
   // context.arc(d.x, d.y, 3, 0, 2 * Math.PI);
@@ -415,20 +326,6 @@ function drawNode(layout, d) {
   const iconWidth = 92;
   const iconHeight = 48;
   const radius = 22;
-
-  switch (layout) {
-    case 'grid':
-      break;
-    case 'boundedForce':
-      // draw border to check intution
-      context.strokeStyle = 'darkgray';
-      context.strokeRect(-width / 2, -height / 2, width - 2, height - 2);
-      break;
-    default:
-      // draw border to check intution
-      context.strokeStyle = 'darkgray';
-      context.strokeRect(-width / 2, -height / 2, width - 2, height - 2);
-  }
 
   // const minX = Math.min(d.x, width - radius);
   // const nX = Math.max(-width / 2 + radius, minX);
@@ -442,8 +339,8 @@ function drawNode(layout, d) {
   // const minY = Math.min(d.y, 448);
   // const nY = Math.max(-448, minY);
 
-  const nX = boundScalar(d.x, layout);
-  const nY = boundScalar(d.y, layout);
+  const nX = boundScalar(d.x);
+  const nY = boundScalar(d.y);
 
   // if (d.x !== nX || d.y !== nY) {
   //   console.log('d.x', d.x);
@@ -507,21 +404,4 @@ function cacheImages(graph, imageCache) {
     // };
     imageCache[d.id] = image;
   });
-}
-
-function loadTooltipThumb(d) {
-  tooltip.select('*').remove();
-
-  const thumbnailURL = `https://bl.ocks.org/${d.user
-    ? `${d.user}/`
-    : ''}raw/${d.id}/thumbnail.png`;
-
-  const top = d3.event.pageY - 150;
-
-  tooltip
-    .style('top', `${top}px`)
-    .style('left', `${d3.event.pageX + 40}px`)
-    .style('visibility', 'visible')
-    .append('img')
-    .attr('src', thumbnailURL);
 }
