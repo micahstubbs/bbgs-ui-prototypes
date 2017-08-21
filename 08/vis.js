@@ -7,14 +7,6 @@ const searchRadius = 30;
 const color = d3.scaleOrdinal().range(d3.schemeCategory20);
 let simulation;
 
-// const tooltip = d3
-//   .select('body')
-//   .append('div')
-//   .attr('class', 'tooltip')
-//   .style('position', 'absolute')
-//   .style('z-index', '10')
-//   .style('visibility', 'hidden');
-
 //
 // make the request to neo4j for the data
 //
@@ -324,7 +316,6 @@ function drawGraph(graph, layout) {
 
     if (!d) return a.removeAttribute('href');
     a.removeAttribute('title');
-    // tooltip.style('visibility', 'hidden');
     a.setAttribute(
       'href',
       `http://bl.ocks.org/${d.user ? `${d.user}/` : ''}${d.id}`
@@ -335,10 +326,6 @@ function drawGraph(graph, layout) {
         ? `\n${d.description}`
         : ''}`
     );
-    //
-    // disable tooltips for now
-    //
-    // loadTooltipThumb(d);
   }
 
   function clicked() {
@@ -510,21 +497,4 @@ function cacheImages(graph, imageCache) {
     // };
     imageCache[d.id] = image;
   });
-}
-
-function loadTooltipThumb(d) {
-  tooltip.select('*').remove();
-
-  const thumbnailURL = `https://bl.ocks.org/${d.user
-    ? `${d.user}/`
-    : ''}raw/${d.id}/thumbnail.png`;
-
-  const top = d3.event.pageY - 150;
-
-  tooltip
-    .style('top', `${top}px`)
-    .style('left', `${d3.event.pageX + 40}px`)
-    .style('visibility', 'visible')
-    .append('img')
-    .attr('src', thumbnailURL);
 }
