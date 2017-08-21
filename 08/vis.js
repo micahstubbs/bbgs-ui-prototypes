@@ -322,8 +322,6 @@ function drawGraph(graph, layout) {
     const m = d3.mouse(this);
     const d = findDataUnderMouse(m, layout);
 
-    // console.log('m from mousemove', m);
-    console.log('d from mousemove', d);
     if (!d) return a.removeAttribute('href');
     a.removeAttribute('title');
     // tooltip.style('visibility', 'hidden');
