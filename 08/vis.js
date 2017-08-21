@@ -6,6 +6,10 @@ const searchRadius = 30;
 
 const color = d3.scaleOrdinal().range(d3.schemeCategory20);
 let simulation;
+const globalGraph = {
+  nodes: [],
+  links: []
+};
 
 //
 // make the request to neo4j for the data
@@ -73,10 +77,7 @@ const imageCache = {};
 // parse the response from neo4j
 //
 function parseResponse(responseData) {
-  const graph = {
-    nodes: [],
-    links: []
-  };
+  const graph = globalGraph;
   const nodeHash = {};
 
   console.log('responseData from parseResponse', responseData);
@@ -117,13 +118,28 @@ function parseResponse(responseData) {
   // call the drawGraph function
   // to plot the graph
   drawGraph(graph, 'grid'); // 'boundedForce'
+
+  //
+  // add event listeners to buttons
+  // to switch layout on button click
+  //
+  d3.select('#grid-force-button').on('click', () => {
+    drawGraph(globalGraph, 'grid');
+  });
+  d3.select('#bounded-force-button').on('click', () => {
+    drawGraph(globalGraph, 'boundedForce');
+  });
 }
 
 //
 // visualize the graph
 //
-function drawGraph(graph, layout) {
-  console.log('graph from drawGraph', graph);
+function drawGraph(inputGraph, layout) {
+  // make a copy of inputGraph
+  // so that we have a pristine globalGraph
+  // to use the next time we call drawGraph
+  const graph = _.cloneDeep(inputGraph);
+  
   cacheImages(graph, imageCache);
 
   switch (layout) {
