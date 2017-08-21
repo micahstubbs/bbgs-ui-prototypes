@@ -254,8 +254,6 @@ function drawGraph(graph, layout) {
     )
     .on('tick', ticked);
 
-  // simulation.force('link').links(graph.links);
-
   d3
     .select(canvas)
     .on('mousemove', mousemoved)
@@ -420,28 +418,8 @@ function drawNode(layout, d) {
       context.strokeRect(-width / 2, -height / 2, width - 2, height - 2);
   }
 
-  // const minX = Math.min(d.x, width - radius);
-  // const nX = Math.max(-width / 2 + radius, minX);
-
-  // const minY = Math.min(d.y, height - 2 * radius);
-  // const nY = Math.max(-height / 2 - radius, minY);
-
-  // const minX = Math.min(d.x, 448);
-  // const nX = Math.max(-448, minX);
-
-  // const minY = Math.min(d.y, 448);
-  // const nY = Math.max(-448, minY);
-
   const nX = boundScalar(d.x, layout);
   const nY = boundScalar(d.y, layout);
-
-  // if (d.x !== nX || d.y !== nY) {
-  //   console.log('d.x', d.x);
-  //   console.log('d.y', d.y);
-  //   console.log('nX', nX);
-  //   console.log('nY', nY);
-  //   console.log('------------');
-  // }
 
   // draw images with a circular clip mask
   // so that rectangular thumbnail images become
@@ -492,9 +470,6 @@ function cacheImages(graph, imageCache) {
     image.src = `https://bl.ocks.org/${d.user
       ? `${d.user}/`
       : ''}raw/${d.id}/thumbnail.png`;
-    // image.onload = function() {
-    //   imageCache[d.id] = image;
-    // };
     imageCache[d.id] = image;
   });
 }
