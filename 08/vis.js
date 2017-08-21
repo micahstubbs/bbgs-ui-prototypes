@@ -5,6 +5,7 @@ const height = canvas.height;
 const searchRadius = 30;
 
 const color = d3.scaleOrdinal().range(d3.schemeCategory20);
+let simulation;
 
 // const tooltip = d3
 //   .select('body')
@@ -133,7 +134,6 @@ function drawGraph(graph, layout) {
   console.log('graph from drawGraph', graph);
   cacheImages(graph, imageCache);
 
-  let simulation;
   switch (layout) {
     case 'grid':
       // Create the simulation with a small forceX and Y towards the center
@@ -309,11 +309,9 @@ function drawGraph(graph, layout) {
   }
 
   function dragsubject() {
-    return simulation.find(
-      d3.event.x - width / 2,
-      d3.event.y - height / 2,
-      searchRadius
-    );
+    const m = [d3.event.x, d3.event.y];
+    const d = findDataUnderMouse(m, layout);
+    return d;
   }
 
   function mousemoved() {
@@ -322,11 +320,10 @@ function drawGraph(graph, layout) {
     //
     const a = this.parentNode;
     const m = d3.mouse(this);
-    const d = simulation.find(
-      m[0] - width / 2,
-      m[1] - height / 2,
-      searchRadius
-    );
+    const d = findDataUnderMouse(m, layout);
+
+    // console.log('m from mousemove', m);
+    console.log('d from mousemove', d);
     if (!d) return a.removeAttribute('href');
     a.removeAttribute('title');
     // tooltip.style('visibility', 'hidden');
@@ -348,14 +345,22 @@ function drawGraph(graph, layout) {
 
   function clicked() {
     const m = d3.mouse(this);
-    const d = simulation.find(
-      m[0] - width / 2,
-      m[1] - height / 2,
-      searchRadius
-    );
+    const d = findDataUnderMouse(m, layout);
     const blockUrl = `http://bl.ocks.org/${d.user ? `${d.user}/` : ''}${d.id}`;
     window.open(blockUrl);
   }
+}
+
+function findDataUnderMouse(mousePosition, layout) {
+    const m = mousePosition;
+    switch (layout) {
+      case 'grid':
+        return simulation.find(m[0], m[1], searchRadius);
+      case 'boundedForce':
+        return simulation.find(m[0] - width / 2, m[1] - height / 2, searchRadius);
+      default:
+        return simulation.find(m[0] - width / 2, m[1] - height / 2, searchRadius);
+    }
 }
 
 function dragstarted() {
