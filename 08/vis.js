@@ -291,8 +291,6 @@ function drawGraph(graph, layout) {
     users.forEach(user => {
       context.beginPath();
       user.values.forEach(drawNode.bind(this, layout));
-      context.fillStyle = color(user.key);
-      context.fill();
     });
 
     context.restore();
@@ -335,15 +333,15 @@ function drawGraph(graph, layout) {
 }
 
 function findDataUnderMouse(mousePosition, layout) {
-    const m = mousePosition;
-    switch (layout) {
-      case 'grid':
-        return simulation.find(m[0], m[1], searchRadius);
-      case 'boundedForce':
-        return simulation.find(m[0] - width / 2, m[1] - height / 2, searchRadius);
-      default:
-        return simulation.find(m[0] - width / 2, m[1] - height / 2, searchRadius);
-    }
+  const m = mousePosition;
+  switch (layout) {
+    case 'grid':
+      return simulation.find(m[0], m[1], searchRadius);
+    case 'boundedForce':
+      return simulation.find(m[0] - width / 2, m[1] - height / 2, searchRadius);
+    default:
+      return simulation.find(m[0] - width / 2, m[1] - height / 2, searchRadius);
+  }
 }
 
 function dragstarted() {
