@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset='utf-8'>
+<style>
+.tooltip {
+  width: 230px;
+  height: 120px;
+  background-color: #ffffff;
+  padding: 3px 12px;
+  font-family: sans-serif;
+  border: 1px solid #bbbbbb;
+  box-shadow: 1px 1px 4px #bbbbbb;
+}
+
+img {
+  max-width: 230px;
+  max-height: 120px;
+}
+
+#canvas-container {
+  width: 100%;
+  text-align: center;
+}
+
+canvas {
+  display: inline;
+}
+</style>
+<div>
+  <form id="query-form" method="post">
+    <textarea id='query-textarea' name='Text1' cols='200' rows='5' autocomplete='on' autofocus='true' spellcheck='false'></textarea>
+    <input type="submit" value="Search the Graph">
+  </form>
+</div>
+<a target='_blank' style='outline:none;'>
+  <div id='canvas-container'>
+    <canvas width='960' height='960'>Your browser does not support canvas</canvas>
+  </div>
+</a>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/d3/4.10.0/d3.js'></script>
+<script src="forceInABox.js"></script>
+<script src='jsLouvain.js'></script>
+<script src='vis.js'></script>
