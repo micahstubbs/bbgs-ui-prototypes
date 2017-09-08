@@ -139,7 +139,7 @@ function drawGraph(inputGraph, layout) {
   // so that we have a pristine globalGraph
   // to use the next time we call drawGraph
   const graph = _.cloneDeep(inputGraph);
-  
+
   cacheImages(graph, imageCache);
 
   switch (layout) {
@@ -354,9 +354,17 @@ function findDataUnderMouse(mousePosition, layout) {
     case 'grid':
       return simulation.find(m[0], m[1], searchRadius);
     case 'boundedForce':
-      return simulation.find(m[0] - width / 2, m[1] - height / 2, searchRadius);
+      const bFM = [
+        boundScalar(m[0], 'boundedForce'),
+        boundScalar(m[1], 'boundedForce')
+      ];
+      console.log('m', m);
+      console.log('bFM', bFM);
+      const resultFound = simulation.find(bFM[0], bFM[1], searchRadius);
+      console.log('resultFound in findDataUnderMouse', resultFound);
+      return resultFound;
     default:
-      return simulation.find(m[0] - width / 2, m[1] - height / 2, searchRadius);
+      return simulation.find(m[0], m[1], searchRadius);
   }
 }
 
@@ -391,9 +399,8 @@ function boundScalar(p, layout) {
       minP = Math.min(p, halfEdge);
       return Math.max(-halfEdge, minP);
     default:
-      halfEdge = 448;
-      minP = Math.min(p, halfEdge);
-      return Math.max(-halfEdge, minP);
+      minP = Math.min(p, width);
+      return Math.max(0, minP);
   }
 }
 
