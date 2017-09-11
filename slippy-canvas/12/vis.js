@@ -87,8 +87,7 @@ function drawGraph(graph, nodeHash) {
   const simulation = d3
     .forceSimulation()
     .force('charge', d3.forceManyBody())
-    .force('x', d3.forceX(0).strength(0.003))
-    .force('y', d3.forceY(0).strength(0.003));
+    .force('center', d3.forceCenter(width / 2, height / 2));
 
   //
   // detect communities with jsLouvain
@@ -126,34 +125,15 @@ function drawGraph(graph, nodeHash) {
     link.target = nodeIndexHash[link.target];
   });
 
-  //
-  // Instantiate the forceInABox force
-  //
-  const groupingForce = forceInABox()
-    .strength(0.001) // Strength to foci
-    .template('force') // Either treemap or force
-    .groupBy('group') // Node attribute to group
-    .links(graph.links) // The graph links. Must be called after setting the grouping attribute
-    .size([width, height]); // Size of the chart
-
-  // Add your forceInABox to the simulation
+  // add a link force
   simulation
     .nodes(graph.nodes)
-    .force('group', groupingForce)
-    .force(
-      'link',
-      d3
-        .forceLink(graph.links)
-        .distance(50)
-        .strength(groupingForce.getLinkStrength) // default link force will try to join nodes in the same group stronger than if they are in different groups
-    )
+    .force('link', d3.forceLink(graph.links).distance(50))
     .on('tick', ticked);
 
   render();
 
-  canvas
-    .on('click', clicked)
-    .call(
+  canvas.on('click', clicked).call(
     d3
       .drag()
       .subject(dragSubject)
@@ -278,11 +258,7 @@ function drawGraph(graph, nodeHash) {
   function clicked() {
     const background = rects[0];
     const m = d3.mouse(this);
-    const d = simulation.find(
-      m[0] + background.x,
-      m[1] + background.y,
-      radius
-    );
+    const d = simulation.find(m[0] + background.x, m[1] + background.y, radius);
     const blockUrl = `http://bl.ocks.org/${d.user ? `${d.user}/` : ''}${d.id}`;
     window.open(blockUrl);
   }

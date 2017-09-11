@@ -125,15 +125,10 @@ function drawGraph(graph) {
     link.target = nodeIndexHash[link.target];
   });
 
-  // Add your forceInABox to the simulation
+  // add a link force
   simulation
     .nodes(graph.nodes)
-    .force(
-      'link',
-      d3
-        .forceLink(graph.links)
-        .distance(50)
-    )
+    .force('link', d3.forceLink(graph.links).distance(50))
     .on('tick', ticked);
 
   render();
