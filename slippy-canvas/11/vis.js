@@ -87,8 +87,7 @@ function drawGraph(graph) {
   const simulation = d3
     .forceSimulation()
     .force('charge', d3.forceManyBody())
-    .force('x', d3.forceX(0).strength(0.003))
-    .force('y', d3.forceY(0).strength(0.003));
+    .force('center', d3.forceCenter(width / 2, height / 2));
 
   //
   // detect communities with jsLouvain
@@ -126,26 +125,14 @@ function drawGraph(graph) {
     link.target = nodeIndexHash[link.target];
   });
 
-  //
-  // Instantiate the forceInABox force
-  //
-  const groupingForce = forceInABox()
-    .strength(0.001) // Strength to foci
-    .template('force') // Either treemap or force
-    .groupBy('group') // Node attribute to group
-    .links(graph.links) // The graph links. Must be called after setting the grouping attribute
-    .size([width, height]); // Size of the chart
-
   // Add your forceInABox to the simulation
   simulation
     .nodes(graph.nodes)
-    .force('group', groupingForce)
     .force(
       'link',
       d3
         .forceLink(graph.links)
         .distance(50)
-        .strength(groupingForce.getLinkStrength) // default link force will try to join nodes in the same group stronger than if they are in different groups
     )
     .on('tick', ticked);
 
