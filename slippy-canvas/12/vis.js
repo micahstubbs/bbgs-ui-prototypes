@@ -248,17 +248,12 @@ function drawGraph(graph, nodeHash) {
       image.src = `https://bl.ocks.org/${d.user
         ? `${d.user}/`
         : ''}raw/${d.id}/thumbnail.png`;
-      // image.onload = function() {
-      //   imageCache[d.id] = image;
-      // };
       imageCache[d.id] = image;
     });
   }
 
   function clicked() {
-    const background = rects[0];
-    const m = d3.mouse(this);
-    const d = simulation.find(m[0] + background.x, m[1] + background.y, radius);
+    const d = dragSubject();
     const blockUrl = `http://bl.ocks.org/${d.user ? `${d.user}/` : ''}${d.id}`;
     window.open(blockUrl);
   }
