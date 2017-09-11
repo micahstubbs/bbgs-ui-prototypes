@@ -1,26 +1,17 @@
-var canvas = d3.select('canvas'),
-  context = canvas.node().getContext('2d'),
-  width = canvas.property('width'),
-  height = canvas.property('height'),
-  radius = 2.5,
-  transform = d3.zoomIdentity;
+
+var canvas = d3.select("canvas"),
+    context = canvas.node().getContext("2d"),
+    width = canvas.property("width"),
+    height = canvas.property("height"),
+    radius = 2.5,
+    transform = d3.zoomIdentity;
 
 var points = d3.range(2000).map(phyllotaxis(10));
 
 canvas
-  .call(
-    d3
-      .drag()
-      .subject(dragsubject)
-      .on('drag', dragged)
-  )
-  .call(
-    d3
-      .zoom()
-      .scaleExtent([1 / 2, 8])
-      .on('zoom', zoomed)
-  )
-  .call(render);
+    .call(d3.drag().subject(dragsubject).on("drag", dragged))
+    .call(d3.zoom().scaleExtent([1 / 2, 8]).on("zoom", zoomed))
+    .call(render);
 
 function zoomed() {
   transform = d3.event.transform;
@@ -29,10 +20,10 @@ function zoomed() {
 
 function dragsubject() {
   var i,
-    x = transform.invertX(d3.event.x),
-    y = transform.invertY(d3.event.y),
-    dx,
-    dy;
+      x = transform.invertX(d3.event.x),
+      y = transform.invertY(d3.event.y),
+      dx,
+      dy;
 
   for (i = points.length - 1; i >= 0; --i) {
     point = points[i];
@@ -71,8 +62,10 @@ function drawPoint(point) {
 function phyllotaxis(radius) {
   var theta = Math.PI * (3 - Math.sqrt(5));
   return function(i) {
-    var r = radius * Math.sqrt(i),
-      a = theta * i;
-    return [width / 2 + r * Math.cos(a), height / 2 + r * Math.sin(a)];
+    var r = radius * Math.sqrt(i), a = theta * i;
+    return [
+      width / 2 + r * Math.cos(a),
+      height / 2 + r * Math.sin(a)
+    ];
   };
 }
