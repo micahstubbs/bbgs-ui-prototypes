@@ -80,6 +80,7 @@ function parseResponse(responseData) {
 }
 
 function drawGraph(graph, nodeHash) {
+  cacheImages(graph, imageCache);
   //
   // setup force simulation
   //

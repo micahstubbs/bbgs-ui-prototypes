@@ -1,3 +1,7 @@
+this iteration has node images, but still uses the default force layout.
+
+---
+
 multiple items drag, with a force layout, using the graph search data from neo4j
 
 ---
