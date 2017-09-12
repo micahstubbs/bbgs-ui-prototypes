@@ -31,3 +31,10 @@ MATCH(n)-[:LINKS_TO]-(m) WHERE n.user =~ '.*micahstubbs.*'RETURN n, m
 
 // user emeeks
 MATCH(n)-[:LINKS_TO]-(m) WHERE n.user =~ '.*emeeks.*'RETURN n, m
+
+
+// all blocks that link to @veltman's jigsaw morphing
+MATCH (n)-[r:LINKS_TO]-(f)
+WHERE f.gistId = "c582a31d347e04dd75d5331b0074558e"
+MATCH (n)-[:LINKS_TO]-()-[:LINKS_TO]-(fof)
+RETURN n, fof, f
